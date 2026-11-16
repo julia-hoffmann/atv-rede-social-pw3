@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+   <div class="container"
+    <h1 class="text-center"> Chatgit add</h1>
+   <hr>
+   <div class="chat" id="chat">
+    <!-- aqui vão as mensagens -->
+   </div>
+   
+   <hr>
+   <input type="text" id="msg" class="form-control" placeholder="Digite sua mensagem">
+   <button onclick="sendMessage()" class="btn btn-primary btn-lg w-100 mt-2">Enviar</button>
+</div>
+<!-- Script de chat -->
+<script>
+    const nickname = "{{ nickname }}";
+    const socket = io();
+
+    socket.on("connect", () => {
+        socket.emit("join", { nickname: nickname });
+    });
+
+    socket.on("join", data => {
+        const chat = document.getElementById("chat");
+        const p = document.createElement("p");
+        p.innerHTML = `<strong>${data.nickname}</strong> entrou no chat.`;
+        chat.append(p);
+    });
+
+    socket.on("showmsg", data => {
+        const chat = document.getElementById("chat");
+        const p = document.createElement("p");
+        p.innerHTML = `<strong>${data.nickname}</strong>: ${data.msg}`;
+        chat.append(p);
+    });
+
+    function sendMsg() {
+        const msgInput = document.getElementById("msg");
+        const sentMsg = msgInput.value;
+        if (!sentMsg.trim()) return;
+        socket.emit("msg", { msg: sentMsg, nickname: nickname });
+        msgInput.value = "";
+    }
+
+    document.getElementById("msg").addEventListener("keypress", function (e) {
+        if (e.key === "Enter") sendMsg();
+    });
+   {% endblock %}
